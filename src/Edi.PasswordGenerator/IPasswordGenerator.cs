@@ -7,13 +7,13 @@ public interface IPasswordGenerator
 
 public class PasswordRule
 {
-    public PasswordRule(int length, int numberOfNonAlphanumericCharacters)
+    public PasswordRule(int length, int leastNumberOfNonAlphanumericCharacters)
     {
         Length = length;
-        NumberOfNonAlphanumericCharacters = numberOfNonAlphanumericCharacters;
+        LeastNumberOfNonAlphanumericCharacters = leastNumberOfNonAlphanumericCharacters;
     }
 
     public int Length { get; set; }
 
-    public int NumberOfNonAlphanumericCharacters { get; set; }
+    public int LeastNumberOfNonAlphanumericCharacters { get; set; }
 }

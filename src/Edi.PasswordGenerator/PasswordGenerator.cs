@@ -6,22 +6,22 @@ public class DefaultPasswordGenerator : IPasswordGenerator
 {
     public string GeneratePassword(PasswordRule rule = null)
     {
-        return rule == null ? GeneratePasswordDefault() : GeneratePasswordAspNetMembership(rule.Length, rule.NumberOfNonAlphanumericCharacters);
+        return rule == null ? GeneratePasswordDefault() : GeneratePasswordAspNetMembership(rule.Length, rule.LeastNumberOfNonAlphanumericCharacters);
     }
 
     // https://referencesource.microsoft.com/#System.Web/Security/Membership.cs,fe744ec40cace139
     private static readonly char[] Punctuations = "!@#$%^&*()_-+=[{]};:>|./?".ToCharArray();
 
-    public static string GeneratePasswordAspNetMembership(int length, int numberOfNonAlphanumericCharacters)
+    public static string GeneratePasswordAspNetMembership(int length, int leastNumberOfNonAlphanumericCharacters)
     {
         if (length < 1 || length > 128)
         {
             throw new ArgumentOutOfRangeException(nameof(length));
         }
 
-        if (numberOfNonAlphanumericCharacters > length || numberOfNonAlphanumericCharacters < 0)
+        if (leastNumberOfNonAlphanumericCharacters > length || leastNumberOfNonAlphanumericCharacters < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(numberOfNonAlphanumericCharacters));
+            throw new ArgumentOutOfRangeException(nameof(leastNumberOfNonAlphanumericCharacters));
         }
 
         string password;
@@ -57,12 +57,12 @@ public class DefaultPasswordGenerator : IPasswordGenerator
                 }
             }
 
-            if (count < numberOfNonAlphanumericCharacters)
+            if (count < leastNumberOfNonAlphanumericCharacters)
             {
                 int j;
                 var rand = new Random();
 
-                for (j = 0; j < numberOfNonAlphanumericCharacters - count; j++)
+                for (j = 0; j < leastNumberOfNonAlphanumericCharacters - count; j++)
                 {
                     int k;
                     do
