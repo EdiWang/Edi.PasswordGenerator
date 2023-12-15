@@ -37,6 +37,8 @@ var p2 = gen.GeneratePassword();
 
 ### ASP.NET Core
 
+Register `IPasswordGenerator` in DI container.
+
 ```csharp
 services.AddTransient<IPasswordGenerator, DefaultPasswordGenerator>();
 ```
