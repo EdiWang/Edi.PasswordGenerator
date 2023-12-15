@@ -17,18 +17,18 @@ public class Tests
         var generator = new DefaultPasswordGenerator();
         var password = generator.GeneratePassword();
 
-        Assert.IsNotNull(password);
-        Assert.IsNotEmpty(password);
+        Assert.That(password, Is.Not.Null);
+        Assert.That(password, Is.Not.Empty);
 
         // Assert if password has both upper and lower case letters
-        Assert.IsTrue(password.Any(char.IsUpper));
-        Assert.IsTrue(password.Any(char.IsLower));
+        Assert.That(password.Any(char.IsUpper), Is.True);
+        Assert.That(password.Any(char.IsLower), Is.True);
 
         // Assert if password has at least one digit
-        Assert.IsTrue(password.Any(char.IsDigit));
+        Assert.That(password.Any(char.IsDigit), Is.True);
 
         // Assert if password has at least one special character
-        Assert.IsTrue(password.Any(char.IsPunctuation));
+        Assert.That(password.Any(char.IsPunctuation), Is.True);
 
         Assert.Pass();
     }
@@ -41,8 +41,8 @@ public class Tests
         var generator = new DefaultPasswordGenerator();
         var password = generator.GeneratePassword(new(length, 0));
 
-        Assert.IsNotNull(password);
-        Assert.IsNotEmpty(password);
+        Assert.That(password, Is.Not.Null);
+        Assert.That(password, Is.Not.Empty);
 
         Assert.That(password.Length, Is.EqualTo(length));
 
@@ -56,14 +56,14 @@ public class Tests
         var generator = new DefaultPasswordGenerator();
         var password = generator.GeneratePassword(new(10, num));
 
-        Assert.IsNotNull(password);
-        Assert.IsNotEmpty(password);
+        Assert.That(password, Is.Not.Null);
+        Assert.That(password, Is.Not.Empty);
         Assert.That(password.Length, Is.EqualTo(10));
 
         char[] extendedPunctuations = "!@#$%^&*()_-+=[{]};:>|./?".ToCharArray();
 
         // Assert if password has at least num of character in extendedPunctuations
-        Assert.IsTrue(password.Count(c => extendedPunctuations.Contains(c)) >= num);
+        Assert.That(password.Count(c => extendedPunctuations.Contains(c)) >= num, Is.True);
 
         Assert.Pass();
     }
