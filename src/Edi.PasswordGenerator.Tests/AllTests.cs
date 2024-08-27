@@ -22,7 +22,7 @@ public class Tests
         Assert.IsTrue(password.Any(char.IsDigit));
 
         // Assert if password has at least one special character
-        Assert.IsTrue(password.Any(char.IsPunctuation));
+        Assert.IsTrue(password.Any(c => "!@#$%^&*()-_=+[]{}|;:,.<>?".ToCharArray().Contains(c)));
     }
 
     [TestMethod]
