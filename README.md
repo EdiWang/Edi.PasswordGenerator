@@ -15,7 +15,7 @@ NuGet\Install-Package Edi.PasswordGenerator
 ```
 
 ```xml
-<PackageReference Include="Edi.PasswordGenerator" Version="1.0.0" />
+<PackageReference Include="Edi.PasswordGenerator" Version="2.0.0" />
 ```
 
 ## Usage
