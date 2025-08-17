@@ -1,33 +1,37 @@
 using System.Text.RegularExpressions;
+using Xunit;
 
 namespace Edi.PasswordGenerator.Tests;
 
-[TestClass]
-public class SecurePasswordGeneratorTests
+public class SecurePasswordGeneratorTests : IDisposable
 {
-    private SecurePasswordGenerator _generator;
+    private readonly SecurePasswordGenerator _generator;
 
-    [TestInitialize]
-    public void Setup()
+    public SecurePasswordGeneratorTests()
     {
         _generator = new SecurePasswordGenerator();
     }
 
+    public void Dispose()
+    {
+        // Cleanup if needed
+    }
+
     #region GeneratePassword Method Tests
 
-    [TestMethod]
+    [Fact]
     public void GeneratePassword_WithNullRule_ShouldUseDefaultRule()
     {
         // Act
         var password = _generator.GeneratePassword(null);
 
         // Assert
-        Assert.IsNotNull(password);
-        Assert.AreEqual(12, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(12, password.Length);
         AssertPasswordMeetsRequirements(password, 12, 1);
     }
 
-    [TestMethod]
+    [Fact]
     public void GeneratePassword_WithCustomRule_ShouldUseProvidedRule()
     {
         // Arrange
@@ -37,12 +41,12 @@ public class SecurePasswordGeneratorTests
         var password = _generator.GeneratePassword(rule);
 
         // Assert
-        Assert.IsNotNull(password);
-        Assert.AreEqual(16, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(16, password.Length);
         AssertPasswordMeetsRequirements(password, 16, 3);
     }
 
-    [TestMethod]
+    [Fact]
     public void GeneratePassword_WithMinimumValidRule_ShouldGenerateValidPassword()
     {
         // Arrange
@@ -52,8 +56,8 @@ public class SecurePasswordGeneratorTests
         var password = _generator.GeneratePassword(rule);
 
         // Assert
-        Assert.IsNotNull(password);
-        Assert.AreEqual(8, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(8, password.Length);
         AssertPasswordMeetsRequirements(password, 8, 0);
     }
 
@@ -61,19 +65,19 @@ public class SecurePasswordGeneratorTests
 
     #region GenerateSecurePassword Static Method Tests
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_WithDefaultParameters_ShouldGenerateValidPassword()
     {
         // Act
         var password = SecurePasswordGenerator.GenerateSecurePassword();
 
         // Assert
-        Assert.IsNotNull(password);
-        Assert.AreEqual(12, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(12, password.Length);
         AssertPasswordMeetsRequirements(password, 12, 1);
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_WithCustomLength_ShouldGeneratePasswordWithCorrectLength()
     {
         // Arrange
@@ -83,12 +87,12 @@ public class SecurePasswordGeneratorTests
         var password = SecurePasswordGenerator.GenerateSecurePassword(expectedLength);
 
         // Assert
-        Assert.IsNotNull(password);
-        Assert.AreEqual(expectedLength, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(expectedLength, password.Length);
         AssertPasswordMeetsRequirements(password, expectedLength, 1);
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_WithMultipleSpecialChars_ShouldIncludeRequiredSpecialChars()
     {
         // Arrange
@@ -99,12 +103,12 @@ public class SecurePasswordGeneratorTests
         var password = SecurePasswordGenerator.GenerateSecurePassword(length, minSpecialChars);
 
         // Assert
-        Assert.IsNotNull(password);
-        Assert.AreEqual(length, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(length, password.Length);
         AssertPasswordMeetsRequirements(password, length, minSpecialChars);
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_WithZeroSpecialChars_ShouldGenerateValidPassword()
     {
         // Arrange
@@ -115,12 +119,12 @@ public class SecurePasswordGeneratorTests
         var password = SecurePasswordGenerator.GenerateSecurePassword(length, minSpecialChars);
 
         // Assert
-        Assert.IsNotNull(password);
-        Assert.AreEqual(length, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(length, password.Length);
         AssertPasswordMeetsRequirements(password, length, minSpecialChars);
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_WithMinimumLength_ShouldGenerateValidPassword()
     {
         // Arrange
@@ -130,12 +134,12 @@ public class SecurePasswordGeneratorTests
         var password = SecurePasswordGenerator.GenerateSecurePassword(minLength, 1);
 
         // Assert
-        Assert.IsNotNull(password);
-        Assert.AreEqual(minLength, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(minLength, password.Length);
         AssertPasswordMeetsRequirements(password, minLength, 1);
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_MultipleGenerations_ShouldProduceDifferentPasswords()
     {
         // Arrange
@@ -150,35 +154,35 @@ public class SecurePasswordGeneratorTests
         }
 
         // Assert - Should have close to 100 unique passwords (allowing for minimal collision chance)
-        Assert.IsTrue(passwords.Count > 95, $"Expected > 95 unique passwords, got {passwords.Count}");
+        Assert.True(passwords.Count > 95, $"Expected > 95 unique passwords, got {passwords.Count}");
     }
 
     #endregion
 
     #region Exception Tests
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_WithLengthLessThanMinimum_ShouldThrowException()
     {
-        // Act
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => SecurePasswordGenerator.GenerateSecurePassword(7, 1));
+        // Act & Assert
+        Assert.Throws<ArgumentOutOfRangeException>(() => SecurePasswordGenerator.GenerateSecurePassword(7, 1));
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_WithNegativeSpecialChars_ShouldThrowException()
     {
-        // Act
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => SecurePasswordGenerator.GenerateSecurePassword(12, -1));
+        // Act & Assert
+        Assert.Throws<ArgumentOutOfRangeException>(() => SecurePasswordGenerator.GenerateSecurePassword(12, -1));
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_WithTooManySpecialChars_ShouldThrowException()
     {
-        // Act - length 8 with minSpecialChars 6 leaves only 2 positions for required uppercase, lowercase, digit
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => SecurePasswordGenerator.GenerateSecurePassword(8, 6));
+        // Act & Assert - length 8 with minSpecialChars 6 leaves only 2 positions for required uppercase, lowercase, digit
+        Assert.Throws<ArgumentOutOfRangeException>(() => SecurePasswordGenerator.GenerateSecurePassword(8, 6));
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_WithMaxAllowedSpecialChars_ShouldGenerateValidPassword()
     {
         // Arrange - length 8 allows maximum 5 special chars (8 - 3 required categories)
@@ -189,8 +193,8 @@ public class SecurePasswordGeneratorTests
         var password = SecurePasswordGenerator.GenerateSecurePassword(length, maxSpecialChars);
 
         // Assert
-        Assert.IsNotNull(password);
-        Assert.AreEqual(length, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(length, password.Length);
         AssertPasswordMeetsRequirements(password, length, maxSpecialChars);
     }
 
@@ -198,7 +202,7 @@ public class SecurePasswordGeneratorTests
 
     #region Edge Case Tests
 
-    [TestMethod]
+    [Fact]
     public void GeneratePassword_WithLargeLength_ShouldGenerateValidPassword()
     {
         // Arrange
@@ -208,12 +212,12 @@ public class SecurePasswordGeneratorTests
         var password = _generator.GeneratePassword(rule);
 
         // Assert
-        Assert.IsNotNull(password);
-        Assert.AreEqual(100, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(100, password.Length);
         AssertPasswordMeetsRequirements(password, 100, 10);
     }
 
-    [TestMethod]
+    [Fact]
     public void GenerateSecurePassword_ConsistentBehavior_ShouldAlwaysMeetRequirements()
     {
         // Arrange & Act - Test multiple combinations to ensure consistency
@@ -233,9 +237,8 @@ public class SecurePasswordGeneratorTests
             var password = SecurePasswordGenerator.GenerateSecurePassword(testCase.Length, testCase.SpecialChars);
 
             // Assert
-            Assert.IsNotNull(password, $"Password should not be null for length {testCase.Length}");
-            Assert.AreEqual(testCase.Length, password.Length,
-                $"Password length should be {testCase.Length}");
+            Assert.NotNull(password);
+            Assert.Equal(testCase.Length, password.Length);
             AssertPasswordMeetsRequirements(password, testCase.Length, testCase.SpecialChars);
         }
     }
@@ -246,27 +249,27 @@ public class SecurePasswordGeneratorTests
 
     private static void AssertPasswordMeetsRequirements(string password, int expectedLength, int minSpecialChars)
     {
-        Assert.IsNotNull(password);
-        Assert.AreEqual(expectedLength, password.Length);
+        Assert.NotNull(password);
+        Assert.Equal(expectedLength, password.Length);
 
         // Check for required character categories
         var hasUppercase = password.Any(c => char.IsUpper(c) && char.IsLetter(c));
         var hasLowercase = password.Any(c => char.IsLower(c) && char.IsLetter(c));
         var hasDigit = password.Any(c => char.IsDigit(c));
 
-        Assert.IsTrue(hasUppercase, "Password must contain at least one uppercase letter");
-        Assert.IsTrue(hasLowercase, "Password must contain at least one lowercase letter");
-        Assert.IsTrue(hasDigit, "Password must contain at least one digit");
+        Assert.True(hasUppercase, "Password must contain at least one uppercase letter");
+        Assert.True(hasLowercase, "Password must contain at least one lowercase letter");
+        Assert.True(hasDigit, "Password must contain at least one digit");
 
         // Check special characters count
         var specialCharsPattern = @"[!@#$%^&*()\-_=+\[\]{}|;:,.<>?]";
         var specialCharCount = Regex.Matches(password, specialCharsPattern).Count;
-        Assert.IsTrue(specialCharCount >= minSpecialChars,
+        Assert.True(specialCharCount >= minSpecialChars,
             $"Password must contain at least {minSpecialChars} special characters, found {specialCharCount}");
 
         // Verify all characters are from allowed sets
         var allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:,.<>?";
-        Assert.IsTrue(password.All(c => allowedChars.Contains(c)),
+        Assert.True(password.All(c => allowedChars.Contains(c)),
             "Password contains invalid characters");
     }
 
