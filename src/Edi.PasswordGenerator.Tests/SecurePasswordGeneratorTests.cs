@@ -275,3 +275,20 @@ public class SecurePasswordGeneratorTests : IDisposable
 
     #endregion
 }
+
+public class DefaultPasswordGeneratorTests
+{
+    private readonly DefaultPasswordGenerator _generator = new();
+
+    [Fact]
+    public void GeneratePassword_WithCustomRule_ShouldUseSecureGenerator()
+    {
+        var password = _generator.GeneratePassword(new PasswordRule(16, 3));
+
+        Assert.Equal(16, password.Length);
+        Assert.Contains(password, char.IsUpper);
+        Assert.Contains(password, char.IsLower);
+        Assert.Contains(password, char.IsDigit);
+        Assert.True(password.Count(c => !char.IsLetterOrDigit(c)) >= 3);
+    }
+}

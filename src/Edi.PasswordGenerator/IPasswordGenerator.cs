@@ -2,7 +2,7 @@
 
 public interface IPasswordGenerator
 {
-    string GeneratePassword(PasswordRule rule = null);
+    string GeneratePassword(PasswordRule? rule = null);
 }
 
 public class PasswordRule(int length, int leastNumberOfNonAlphanumericCharacters)

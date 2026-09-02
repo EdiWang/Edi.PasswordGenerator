@@ -25,7 +25,7 @@ NuGet\Install-Package Edi.PasswordGenerator
 ```csharp
 var gen = new DefaultPasswordGenerator();
 
-// Using classic ASP.NET MVC membership method
+// Generate a password with a custom rule
 var p1 = gen.GeneratePassword(new(10, 3));
 // example: WSI:R=6s(C
 

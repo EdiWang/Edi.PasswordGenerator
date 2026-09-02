@@ -2,10 +2,11 @@
 
 public class DefaultPasswordGenerator : IPasswordGenerator
 {
-    public string GeneratePassword(PasswordRule rule = null)
+    public string GeneratePassword(PasswordRule? rule = null)
     {
-        return rule == null ? 
-            SecurePasswordGenerator.GenerateSecurePassword() : 
-            AspNetMembershipPasswordGenerator.GeneratePassword(rule.Length, rule.LeastNumberOfNonAlphanumericCharacters);
+        rule ??= new PasswordRule(12, 1);
+        return SecurePasswordGenerator.GenerateSecurePassword(
+            rule.Length,
+            rule.LeastNumberOfNonAlphanumericCharacters);
     }
 }
