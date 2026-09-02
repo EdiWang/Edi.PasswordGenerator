@@ -1,8 +1,13 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 
 namespace Edi.PasswordGenerator;
 
-public class SecurePasswordGenerator : IPasswordGenerator
+#pragma warning disable CS0618
+
+/// <summary>
+/// The password generator used by versions prior to 3.0.0.
+/// </summary>
+public class LegacyPasswordGenerator
 {
     private static readonly char[] UppercaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
     private static readonly char[] LowercaseLetters = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
@@ -14,13 +19,19 @@ public class SecurePasswordGenerator : IPasswordGenerator
         .Concat(SpecialCharacters)
         .ToArray();
 
+    /// <summary>
+    /// Generates a password using the pre-3.0.0 password rules.
+    /// </summary>
     public string GeneratePassword(PasswordRule? rule = null)
     {
         rule ??= new PasswordRule(12, 1);
-        return GenerateSecurePassword(rule.Length, rule.LeastNumberOfNonAlphanumericCharacters);
+        return GenerateLegacyPassword(rule.Length, rule.LeastNumberOfNonAlphanumericCharacters);
     }
 
-    public static string GenerateSecurePassword(int length = 12, int minSpecialChars = 1)
+    /// <summary>
+    /// Generates a password using the pre-3.0.0 password rules.
+    /// </summary>
+    public static string GenerateLegacyPassword(int length = 12, int minSpecialChars = 1)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(length, 8, nameof(length));
         ArgumentOutOfRangeException.ThrowIfNegative(minSpecialChars, nameof(minSpecialChars));
@@ -30,28 +41,34 @@ public class SecurePasswordGenerator : IPasswordGenerator
         var password = new char[length];
         var position = 0;
 
-        // Ensure at least one character from each required category
+        // Ensure at least one character from each required category.
         password[position++] = GetSecureRandomChar(rng, UppercaseLetters);
         password[position++] = GetSecureRandomChar(rng, LowercaseLetters);
         password[position++] = GetSecureRandomChar(rng, Digits);
 
-        // Add required special characters
-        for (int i = 0; i < minSpecialChars; i++)
+        // Add required special characters.
+        for (var i = 0; i < minSpecialChars; i++)
         {
             password[position++] = GetSecureRandomChar(rng, SpecialCharacters);
         }
 
-        // Fill remaining positions with random characters from all categories
-        for (int i = position; i < length; i++)
+        // Fill remaining positions with random characters from all categories.
+        for (var i = position; i < length; i++)
         {
             password[i] = GetSecureRandomChar(rng, AllCharacters);
         }
 
-        // Secure shuffle using Fisher-Yates algorithm
         SecureShuffle(rng, password);
 
         return new string(password);
     }
+
+    /// <summary>
+    /// Compatibility name for callers that used the old static method.
+    /// </summary>
+    [Obsolete("Use GenerateLegacyPassword or PasswordGenerator instead.")]
+    public static string GenerateSecurePassword(int length = 12, int minSpecialChars = 1) =>
+        GenerateLegacyPassword(length, minSpecialChars);
 
     private static char GetSecureRandomChar(RandomNumberGenerator rng, ReadOnlySpan<char> chars)
     {
@@ -61,31 +78,32 @@ public class SecurePasswordGenerator : IPasswordGenerator
     private static int GetSecureRandomInt(RandomNumberGenerator rng, int maxValue)
     {
         if (maxValue <= 1)
+        {
             return 0;
+        }
 
-        // Calculate the largest multiple of maxValue that fits in uint range
-        uint maxValidValue = uint.MaxValue - (uint.MaxValue % (uint)maxValue);
-
+        var maxValidValue = uint.MaxValue - uint.MaxValue % (uint)maxValue;
         Span<byte> bytes = stackalloc byte[4];
         uint randomValue;
 
-        // Rejection sampling to avoid bias
         do
         {
             rng.GetBytes(bytes);
             randomValue = BitConverter.ToUInt32(bytes);
-        } while (randomValue >= maxValidValue);
+        }
+        while (randomValue >= maxValidValue);
 
         return (int)(randomValue % (uint)maxValue);
     }
 
     private static void SecureShuffle(RandomNumberGenerator rng, Span<char> array)
     {
-        // Fisher-Yates shuffle with cryptographically secure randomness
-        for (int i = array.Length - 1; i > 0; i--)
+        for (var i = array.Length - 1; i > 0; i--)
         {
-            int j = GetSecureRandomInt(rng, i + 1);
+            var j = GetSecureRandomInt(rng, i + 1);
             (array[i], array[j]) = (array[j], array[i]);
         }
     }
 }
+
+#pragma warning restore CS0618

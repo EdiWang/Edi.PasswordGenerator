@@ -2,7 +2,7 @@
 
 [![.NET Build and Pack](https://github.com/EdiWang/Edi.PasswordGenerator/actions/workflows/dotnet.yml/badge.svg)](https://github.com/EdiWang/Edi.PasswordGenerator/actions/workflows/dotnet.yml)
 
-Generate secure password, but I am not sure, so use it on your own risk.
+Generate Chromium-style passwords with cryptographically secure randomness.
 
 ## Install from NuGet
 
@@ -15,7 +15,7 @@ NuGet\Install-Package Edi.PasswordGenerator
 ```
 
 ```xml
-<PackageReference Include="Edi.PasswordGenerator" Version="2.0.0" />
+<PackageReference Include="Edi.PasswordGenerator" Version="3.0.0" />
 ```
 
 ## Usage
@@ -23,24 +23,34 @@ NuGet\Install-Package Edi.PasswordGenerator
 ### .NET
 
 ```csharp
-var gen = new DefaultPasswordGenerator();
+var generator = new PasswordGenerator();
 
-// Generate a password with a custom rule
-var p1 = gen.GeneratePassword(new(10, 3));
-// example: WSI:R=6s(C
+// Uses the Chromium-style defaults: 15 characters, letters and numbers,
+// with ambiguous characters excluded.
+var password = generator.GeneratePassword();
 
-// Quickly get a password
-var p2 = gen.GeneratePassword();
-// example: ou45V8La%X
-
+// Customize the character classes and length.
+var customPassword = generator.GeneratePassword(new ChromiumPasswordOptions
+{
+    Length = 24,
+    UseUppercase = true,
+    UseLowercase = true,
+    UseNumbers = true,
+    UseSymbols = true,
+    ExcludeAmbiguous = true
+});
 ```
+
+`DefaultPasswordGenerator` remains available as a compatibility name for
+`PasswordGenerator`. The pre-3.0.0 algorithm is available explicitly through
+`LegacyPasswordGenerator` and `PasswordRule`.
 
 ### ASP.NET Core
 
-Register `IPasswordGenerator` in DI container.
+Register `IPasswordGenerator` in the DI container.
 
 ```csharp
-services.AddTransient<IPasswordGenerator, DefaultPasswordGenerator>();
+services.AddTransient<IPasswordGenerator, PasswordGenerator>();
 ```
 
 ```csharp
@@ -48,7 +58,7 @@ services.AddTransient<IPasswordGenerator, DefaultPasswordGenerator>();
 [ProducesResponseType(StatusCodes.Status200OK)]
 public IActionResult GeneratePassword([FromServices] IPasswordGenerator passwordGenerator)
 {
-    var password = passwordGenerator.GeneratePassword(new(10, 3));
+    var password = passwordGenerator.GeneratePassword();
     return Ok(new
     {
         ServerTimeUtc = DateTime.UtcNow,
